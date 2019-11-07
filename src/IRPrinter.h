@@ -16,6 +16,7 @@
 
 #include <ostream>
 
+#include "Func.h"
 #include "IRVisitor.h"
 #include "Module.h"
 #include "Scope.h"
@@ -49,6 +50,18 @@ std::ostream &operator<<(std::ostream &stream, const LoopLevel &);
 struct Target;
 /** Emit a halide Target in a human readable form */
 std::ostream &operator<<(std::ostream &stream, const Target &);
+
+/** Emit a halide Func in a human readable form. */
+class Func;
+std::ostream &operator<<(std::ostream &stream, const Func &);
+
+struct FuncWithDependencies {
+    Func func;
+
+    explicit FuncWithDependencies(const Func &f) : func(f) {}
+};
+/** Emit a halide Func in a human readable form, including all dependent Funcs. */
+std::ostream &operator<<(std::ostream &stream, const FuncWithDependencies &);
 
 namespace Internal {
 
@@ -91,7 +104,7 @@ std::ostream &operator<<(std::ostream &stream, const Indentation &);
  */
 class IRPrinter : public IRVisitor {
 public:
-    virtual ~IRPrinter();
+    virtual ~IRPrinter() = default;
 
     /** Construct an IRPrinter pointed at a given output stream
      * (e.g. std::cout, or a std::ofstream) */
