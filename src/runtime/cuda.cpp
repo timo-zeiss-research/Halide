@@ -416,27 +416,18 @@ WEAK CUresult create_cuda_context(void *user_context, CUcontext *ctx) {
     }
     #endif
 
-    // Create context
-    debug(user_context) <<  "    cuCtxCreate " << dev << " -> ";
-    err = cuCtxCreate(ctx, 0, dev);
+    // Retain the primary context on the GPU to play nice with other CUDA functions and libraries.
+    debug(user_context) << "    cuDevicePrimaryCtxRetain " << dev << " -> ";
+    err = cuDevicePrimaryCtxRetain(ctx, dev);
     if (err != CUDA_SUCCESS) {
         debug(user_context) << get_error_name(err) << "\n";
-        error(user_context) << "CUDA: cuCtxCreate failed: "
+        error(user_context) << "CUDA: cuDevicePrimaryCtxRetain failed: "
                             << get_error_name(err);
         return err;
     } else {
         unsigned int version = 0;
         cuCtxGetApiVersion(*ctx, &version);
         debug(user_context) << *ctx << "(" << version << ")\n";
-    }
-    // Creation automatically pushes the context, but we'll pop to allow the caller
-    // to decide when to push.
-    CUcontext dummy;
-    err = cuCtxPopCurrent(&dummy);
-    if (err != CUDA_SUCCESS) {
-      error(user_context) << "CUDA: cuCtxPopCurrent failed: "
-                          << get_error_name(err);
-      return err;
     }
 
     return CUDA_SUCCESS;
@@ -735,9 +726,11 @@ WEAK int halide_cuda_device_release(void *user_context) {
             ScopedMutexLock spinlock(&context_lock);
 
             if (ctx == context) {
-                debug(user_context) << "    cuCtxDestroy " << context << "\n";
+                debug(user_context) << "    cuPrimaryContextRelease " << context << "\n";
                 err = cuProfilerStop();
-                err = cuCtxDestroy(context);
+                CUdevice dev;
+                cuCtxGetDevice(&dev);
+                err = cuDevicePrimaryCtxRelease (dev);
                 halide_assert(user_context, err == CUDA_SUCCESS || err == CUDA_ERROR_DEINITIALIZED);
                 context = NULL;
             }

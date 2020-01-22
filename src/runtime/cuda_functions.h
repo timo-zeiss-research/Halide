@@ -15,6 +15,9 @@
 #ifndef CUDA_FN_4000
 #define CUDA_FN_4000(ret, fn, fn_4000, args) CUDA_FN(ret, fn, args)
 #endif
+#ifndef CUDA_FN_7000
+#define CUDA_FN_7000(ret, fn, fn_7000, args) CUDA_FN(ret, fn, args)
+#endif
 
 CUDA_FN(CUresult, cuInit, (unsigned int Flags));
 CUDA_FN(CUresult, cuDeviceGetCount, (int *count));
@@ -52,6 +55,9 @@ CUDA_FN(CUresult, cuCtxSynchronize, ());
 
 CUDA_FN_4000(CUresult, cuCtxPushCurrent, cuCtxPushCurrent_v2, (CUcontext ctx));
 CUDA_FN_4000(CUresult, cuCtxPopCurrent, cuCtxPopCurrent_v2, (CUcontext *pctx));
+
+CUDA_FN(CUresult, cuDevicePrimaryCtxRetain, (CUcontext* ctx, CUdevice dev));
+CUDA_FN(CUresult, cuDevicePrimaryCtxRelease,(CUdevice dev));
 
 CUDA_FN(CUresult, cuPointerGetAttribute, (void *result, int query, CUdeviceptr ptr));
 
