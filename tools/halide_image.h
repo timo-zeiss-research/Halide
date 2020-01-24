@@ -22,10 +22,10 @@ namespace Tools {
 
 #define USING_HALIDE_BUFFER
 
-template<typename T>
+template< typename T >
 using Image = Buffer<T>;
 
-}  // namespace Tools
-}  // namespace Halide
+}   // namespace Tools
+}   // mamespace Halide
 
 #endif  // #ifndef HALIDE_TOOLS_IMAGE_H

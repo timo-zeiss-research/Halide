@@ -1,6 +1,6 @@
-#include "device_interface.h"
 #include "HalideRuntime.h"
 #include "device_buffer_utils.h"
+#include "device_interface.h"
 #include "printer.h"
 #include "scoped_mutex_lock.h"
 
@@ -8,11 +8,10 @@ extern "C" {
 
 extern void *malloc(size_t);
 extern void free(void *);
+
 }
 
-namespace Halide {
-namespace Runtime {
-namespace Internal {
+namespace Halide { namespace Runtime { namespace Internal {
 
 struct device_handle_wrapper {
     uint64_t device_handle;
@@ -53,14 +52,13 @@ WEAK int copy_to_host_already_locked(void *user_context, struct halide_buffer_t 
     return result;
 }
 
-}  // namespace Internal
-}  // namespace Runtime
-}  // namespace Halide
+}}} // namespace Halide::Runtime::Internal
 
 namespace {
 
-__attribute__((always_inline)) int debug_log_and_validate_buf(void *user_context, const halide_buffer_t *buf_arg,
-                                                              const char *routine) {
+__attribute__((always_inline))
+int debug_log_and_validate_buf(void *user_context, const halide_buffer_t *buf_arg,
+                                const char *routine) {
     if (buf_arg == NULL) {
         return halide_error_buffer_is_null(user_context, routine);
     }
@@ -97,7 +95,7 @@ __attribute__((always_inline)) int debug_log_and_validate_buf(void *user_context
     return 0;
 }
 
-}  // namespace
+}
 
 extern "C" {
 
@@ -264,7 +262,7 @@ WEAK void halide_device_free_as_destructor(void *user_context, void *obj) {
     halide_device_free(user_context, buf);
 }
 
-/** Allocate host and device memory to back a halide_buffer_t. Ideally this
+/** Allocate host and device memory to back a buffer_t. Ideally this
  * will be a zero copy setup, but the default implementation may
  * separately allocate the host memory using halide_malloc and the
  * device memory using halide_device_malloc. */
@@ -297,7 +295,7 @@ WEAK int halide_device_and_host_malloc(void *user_context, struct halide_buffer_
     return 0;
 }
 
-/** Free host and device memory associated with a halide_buffer_t. */
+/** Free host and device memory associated with a buffer_t. */
 WEAK int halide_device_and_host_free(void *user_context, struct halide_buffer_t *buf) {
     int result = debug_log_and_validate_buf(user_context, buf, "halide_device_and_host_free");
     if (result != 0) {
@@ -362,6 +360,7 @@ WEAK int halide_default_device_and_host_free(void *user_context, struct halide_b
     buf->set_device_dirty(false);
     return result;
 }
+
 
 WEAK int halide_device_wrap_native(void *user_context, struct halide_buffer_t *buf, uint64_t handle,
                                    const halide_device_interface_t *device_interface) {
@@ -429,7 +428,7 @@ WEAK int halide_default_device_detach_native(void *user_context, struct halide_b
     return 0;
 }
 
-/** Free any host and device memory associated with a halide_buffer_t and ignore any
+/** Free any host and device memory associated with a buffer_t and ignore any
  * error. Used when freeing as a destructor on an error. */
 WEAK void halide_device_and_host_free_as_destructor(void *user_context, void *obj) {
     struct halide_buffer_t *buf = (struct halide_buffer_t *)obj;
@@ -441,8 +440,8 @@ WEAK void halide_device_host_nop_free(void *user_context, void *obj) {
 }
 
 WEAK int halide_default_buffer_copy(void *user_context, struct halide_buffer_t *src,
-                                    const struct halide_device_interface_t *dst_device_interface,
-                                    struct halide_buffer_t *dst) {
+                                           const struct halide_device_interface_t *dst_device_interface,
+                                           struct halide_buffer_t *dst) {
 
     debug(user_context)
         << "halide_default_buffer_copy\n"
@@ -461,8 +460,8 @@ WEAK int halide_default_buffer_copy(void *user_context, struct halide_buffer_t *
 }
 
 WEAK int halide_buffer_copy_already_locked(void *user_context, struct halide_buffer_t *src,
-                                           const struct halide_device_interface_t *dst_device_interface,
-                                           struct halide_buffer_t *dst) {
+                                    const struct halide_device_interface_t *dst_device_interface,
+                                    struct halide_buffer_t *dst) {
     debug(user_context) << "halide_buffer_copy_already_locked called.\n";
     int err = 0;
 
@@ -613,6 +612,7 @@ WEAK int halide_buffer_copy(void *user_context, struct halide_buffer_t *src,
     return err;
 }
 
+
 WEAK int halide_default_device_crop(void *user_context,
                                     const struct halide_buffer_t *src,
                                     struct halide_buffer_t *dst) {
@@ -621,9 +621,9 @@ WEAK int halide_default_device_crop(void *user_context,
 }
 
 WEAK int halide_default_device_slice(void *user_context,
-                                     const struct halide_buffer_t *src,
-                                     int slice_dim, int slice_pos,
-                                     struct halide_buffer_t *dst) {
+                                    const struct halide_buffer_t *src,
+                                    int slice_dim, int slice_pos,
+                                    struct halide_buffer_t *dst) {
     halide_error(user_context, "device_interface does not support slicing\n");
     return halide_error_code_device_crop_unsupported;
 }
@@ -650,8 +650,7 @@ WEAK int halide_device_crop(void *user_context,
     src->device_interface->impl->use_module();
     int err = src->device_interface->impl->device_crop(user_context, src, dst);
 
-    debug(user_context) << "halide_device_crop "
-                        << "\n"
+    debug(user_context) << "halide_device_crop " << "\n"
                         << " src: " << *src << "\n"
                         << " dst: " << *dst << "\n";
 
@@ -681,8 +680,7 @@ WEAK int halide_device_slice(void *user_context,
     src->device_interface->impl->use_module();
     int err = src->device_interface->impl->device_slice(user_context, src, slice_dim, slice_pos, dst);
 
-    debug(user_context) << "halide_device_crop "
-                        << "\n"
+    debug(user_context) << "halide_device_crop " << "\n"
                         << " src: " << *src << "\n"
                         << " dst: " << *dst << "\n";
 
@@ -698,6 +696,7 @@ WEAK int halide_default_device_release_crop(void *user_context,
     return halide_error_code_device_crop_unsupported;
 }
 
+
 WEAK int halide_device_release_crop(void *user_context,
                                     struct halide_buffer_t *buf) {
     if (buf->device) {
@@ -712,4 +711,4 @@ WEAK int halide_device_release_crop(void *user_context,
     return 0;
 }
 
-}  // extern "C" linkage
+} // extern "C" linkage

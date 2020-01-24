@@ -1,8 +1,8 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "HalideBuffer.h"
 #include "embed_image.h"
+#include "HalideBuffer.h"
 
 using namespace Halide::Runtime;
 

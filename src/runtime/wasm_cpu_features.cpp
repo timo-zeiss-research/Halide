@@ -1,9 +1,7 @@
 #include "HalideRuntime.h"
 #include "cpu_features.h"
 
-namespace Halide {
-namespace Runtime {
-namespace Internal {
+namespace Halide { namespace Runtime { namespace Internal {
 
 WEAK CpuFeatures halide_get_cpu_features() {
     CpuFeatures features;
@@ -18,6 +16,4 @@ WEAK CpuFeatures halide_get_cpu_features() {
     return features;
 }
 
-}  // namespace Internal
-}  // namespace Runtime
-}  // namespace Halide
+}}}  // namespace Halide::Runtime::Internal

@@ -11,4 +11,5 @@ int32_t extract_value_ns(const int32_t *arg) {
     return *arg;
 }
 
-}  // namespace HalideTest
+}
+

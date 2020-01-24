@@ -14,4 +14,5 @@ WEAK void __stack_chk_fail() {
     halide_error(NULL, "Memory error: stack smashing protector changed!\n");
     Halide::Runtime::Internal::halide_abort();
 }
+
 }

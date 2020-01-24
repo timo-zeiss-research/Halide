@@ -1,10 +1,10 @@
 #include "Halide.h"
 #include "halide_benchmark.h"
 
-#include <atomic>
-#include <chrono>
 #include <stdio.h>
+#include <chrono>
 #include <thread>
+#include <atomic>
 
 using namespace Halide;
 using namespace Halide::Tools;
@@ -17,10 +17,11 @@ std::atomic<int32_t> call_count;
 #define DLLEXPORT
 #endif
 
-extern "C" DLLEXPORT int five_ms(int arg) {
-    call_count++;
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    return arg;
+extern "C" DLLEXPORT
+int five_ms(int arg) {
+  call_count++;
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  return arg;
 }
 
 namespace halide_externs {
@@ -28,10 +29,10 @@ HalideExtern_1(int, five_ms, int);
 }
 
 enum Schedule {
-    Serial,
-    Parallel,
-    AsyncRoot,
-    AsyncComputeAt,
+  Serial,
+  Parallel,
+  AsyncRoot,
+  AsyncComputeAt,
 };
 
 Func make(Schedule schedule) {
@@ -80,7 +81,7 @@ int main(int argc, char **argv) {
     double time;
 
     call_count = 0;
-    both = make(Serial);
+    both  = make(Serial);
     im = both.realize(10, 10, 2);
     count = call_count;
     time = benchmark([&]() {

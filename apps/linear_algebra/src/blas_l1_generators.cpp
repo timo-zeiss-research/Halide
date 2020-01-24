@@ -1,5 +1,5 @@
-#include "Halide.h"
 #include <vector>
+#include "Halide.h"
 
 using namespace Halide;
 
@@ -7,24 +7,23 @@ namespace {
 
 // Generator class for BLAS axpy operations.
 template<class T>
-class AXPYGenerator : public Generator<AXPYGenerator<T>> {
-public:
+class AXPYGenerator :
+        public Generator<AXPYGenerator<T>> {
+  public:
     typedef Generator<AXPYGenerator<T>> Base;
+    using Base::target;
     using Base::get_target;
     using Base::natural_vector_size;
-    using Base::target;
-    template<typename T2>
-    using Input = typename Base::template Input<T2>;
-    template<typename T2>
-    using Output = typename Base::template Output<T2>;
+    template<typename T2> using Input = typename Base::template Input<T2>;
+    template<typename T2> using Output = typename Base::template Output<T2>;
 
     GeneratorParam<bool> vectorize_ = {"vectorize", true};
-    GeneratorParam<int> block_size_ = {"block_size", 1024};
+    GeneratorParam<int>  block_size_ = {"block_size", 1024};
     GeneratorParam<bool> scale_x_ = {"scale_x", true};
     GeneratorParam<bool> add_to_y_ = {"add_to_y", true};
 
     // Standard ordering of parameters in AXPY functions.
-    Input<T> a_ = {"a", 1};
+    Input<T>         a_ = {"a", 1};
     Input<Buffer<T>> x_ = {"x", 1};
     Input<Buffer<T>> y_ = {"y", 1};
 
@@ -49,12 +48,12 @@ public:
         assert(get_target().has_feature(Target::NoAsserts));
         assert(get_target().has_feature(Target::NoBoundsQuery));
 
-        const int vec_size = vectorize_ ? natural_vector_size(type_of<T>()) : 1;
+        const int vec_size = vectorize_? natural_vector_size(type_of<T>()): 1;
         Expr size = x_.width();
         Expr size_vecs = (size / vec_size) * vec_size;
         Expr size_tail = size - size_vecs;
 
-        Var i("i");
+        Var  i("i");
         RDom vecs(0, size_vecs, "vec");
         RDom tail(size_vecs, size_tail, "tail");
         result_(i) = undef(type_of<T>());
@@ -76,20 +75,19 @@ public:
 
 // Generator class for BLAS dot operations.
 template<class T>
-class DotGenerator : public Generator<DotGenerator<T>> {
-public:
+class DotGenerator :
+        public Generator<DotGenerator<T>> {
+  public:
     typedef Generator<DotGenerator<T>> Base;
+    using Base::target;
     using Base::get_target;
     using Base::natural_vector_size;
-    using Base::target;
-    template<typename T2>
-    using Input = typename Base::template Input<T2>;
-    template<typename T2>
-    using Output = typename Base::template Output<T2>;
+    template<typename T2> using Input = typename Base::template Input<T2>;
+    template<typename T2> using Output = typename Base::template Output<T2>;
 
     GeneratorParam<bool> vectorize_ = {"vectorize", true};
     GeneratorParam<bool> parallel_ = {"parallel", true};
-    GeneratorParam<int> block_size_ = {"block_size", 1024};
+    GeneratorParam<int>  block_size_ = {"block_size", 1024};
 
     Input<Buffer<T>> x_ = {"x", 1};
     Input<Buffer<T>> y_ = {"y", 1};
@@ -100,7 +98,7 @@ public:
         assert(get_target().has_feature(Target::NoAsserts));
         assert(get_target().has_feature(Target::NoBoundsQuery));
 
-        const int vec_size = vectorize_ ? natural_vector_size(type_of<T>()) : 1;
+        const int vec_size = vectorize_? natural_vector_size(type_of<T>()): 1;
         Expr size = x_.width();
         Expr size_vecs = size / vec_size;
         Expr size_tail = size - size_vecs * vec_size;
@@ -110,7 +108,7 @@ public:
             Func dot;
 
             RDom k(0, size_vecs);
-            dot(i) += x_(k * vec_size + i) * y_(k * vec_size + i);
+            dot(i) += x_(k*vec_size + i) * y_(k*vec_size + i);
 
             RDom lanes(0, vec_size);
             RDom tail(size_vecs * vec_size, size_tail);
@@ -133,20 +131,19 @@ public:
 
 // Generator class for BLAS dot operations.
 template<class T>
-class AbsSumGenerator : public Generator<AbsSumGenerator<T>> {
-public:
+class AbsSumGenerator :
+        public Generator<AbsSumGenerator<T>> {
+  public:
     typedef Generator<AbsSumGenerator<T>> Base;
+    using Base::target;
     using Base::get_target;
     using Base::natural_vector_size;
-    using Base::target;
-    template<typename T2>
-    using Input = typename Base::template Input<T2>;
-    template<typename T2>
-    using Output = typename Base::template Output<T2>;
+    template<typename T2> using Input = typename Base::template Input<T2>;
+    template<typename T2> using Output = typename Base::template Output<T2>;
 
     GeneratorParam<bool> vectorize_ = {"vectorize", true};
     GeneratorParam<bool> parallel_ = {"parallel", true};
-    GeneratorParam<int> block_size_ = {"block_size", 1024};
+    GeneratorParam<int>  block_size_ = {"block_size", 1024};
 
     Input<Buffer<T>> x_ = {"x", 1};
 
@@ -156,7 +153,7 @@ public:
         assert(get_target().has_feature(Target::NoAsserts));
         assert(get_target().has_feature(Target::NoBoundsQuery));
 
-        const int vec_size = vectorize_ ? natural_vector_size(type_of<T>()) : 1;
+        const int vec_size = vectorize_? natural_vector_size(type_of<T>()): 1;
         Expr size = x_.width();
         Expr size_vecs = size / vec_size;
         Expr size_tail = size - size_vecs * vec_size;
@@ -166,7 +163,7 @@ public:
             Func norm;
 
             RDom k(0, size_vecs);
-            norm(i) += abs(x_(k * vec_size + i));
+            norm(i) += abs(x_(k*vec_size + i));
 
             RDom lanes(0, vec_size);
             RDom tail(size_vecs * vec_size, size_tail);
@@ -194,3 +191,4 @@ HALIDE_REGISTER_GENERATOR(DotGenerator<float>, sdot)
 HALIDE_REGISTER_GENERATOR(DotGenerator<double>, ddot)
 HALIDE_REGISTER_GENERATOR(AbsSumGenerator<float>, sasum)
 HALIDE_REGISTER_GENERATOR(AbsSumGenerator<double>, dasum)
+

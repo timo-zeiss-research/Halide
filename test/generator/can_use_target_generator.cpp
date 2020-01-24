@@ -17,3 +17,4 @@ public:
 }  // namespace
 
 HALIDE_REGISTER_GENERATOR(CanUseTarget, can_use_target)
+

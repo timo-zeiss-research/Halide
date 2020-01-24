@@ -3,9 +3,7 @@ include ../support/Makefile.inc
 OPS = $(BIN)/$(HL_TARGET)/add_float32.a \
       $(BIN)/$(HL_TARGET)/add_float64.a \
       $(BIN)/$(HL_TARGET)/add_grad_float32.a \
-      $(BIN)/$(HL_TARGET)/add_grad_float64.a \
-      $(BIN)/$(HL_TARGET)/add_halidegrad_float32.a \
-      $(BIN)/$(HL_TARGET)/add_halidegrad_float64.a
+      $(BIN)/$(HL_TARGET)/add_grad_float64.a
 
 # Check whether we have cuda installed, if add the CUDA ops as dependencies
 ifeq ($(shell which nvcc),)
@@ -16,9 +14,7 @@ HAS_CUDA = 1
 CUDA_OPS = $(BIN)/$(HL_TARGET)/add_cuda_float32.a \
 	   	   $(BIN)/$(HL_TARGET)/add_cuda_float64.a \
            $(BIN)/$(HL_TARGET)/add_grad_cuda_float32.a \
-	       $(BIN)/$(HL_TARGET)/add_grad_cuda_float64.a \
-		   $(BIN)/$(HL_TARGET)/add_halidegrad_cuda_float32.a \
-		   $(BIN)/$(HL_TARGET)/add_halidegrad_cuda_float64.a
+	       $(BIN)/$(HL_TARGET)/add_grad_cuda_float64.a
 endif
 
 EXT_LIB=$(BIN)/lib
@@ -87,18 +83,6 @@ $(BIN)/%/add_float32.a: $(GENERATOR_BIN)/add.generator
 		target=$* \
 		auto_schedule=false
 
-$(BIN)/%/add_halidegrad_float32.a: $(GENERATOR_BIN)/add.generator
-	@mkdir -p $(@D)
-	@echo Producing CPU halidegrad
-	@$^ -g add \
-		$(ADD_TYPES_F32) \
-		-f add_halidegrad_float32 \
-		-e static_library,c_header,pytorch_wrapper \
-		-o $(@D) \
-		-d 1 \
-		target=$* \
-		auto_schedule=true
-
 $(BIN)/%/add_grad_float32.a: $(GENERATOR_BIN)/add.generator
 	@mkdir -p $(@D)
 	@echo Producing CPU gradient
@@ -120,19 +104,6 @@ $(BIN)/%/add_float64.a: $(GENERATOR_BIN)/add.generator
 		-o $(@D) \
 		target=$* \
 		auto_schedule=false
-
-$(BIN)/%/add_halidegrad_float64.a: $(GENERATOR_BIN)/add.generator
-	@mkdir -p $(@D)
-	@echo "Producing CPU (double) halidegrad"
-	@$^ -g add \
-		$(ADD_TYPES_F64) \
-		-f add_halidegrad_float64 \
-		-e static_library,c_header,pytorch_wrapper \
-		-o $(@D) \
-		target=$* \
-		-d 1 \
-		target=$* \
-		auto_schedule=true
 
 $(BIN)/%/add_grad_float64.a: $(GENERATOR_BIN)/add.generator
 	@mkdir -p $(@D)
@@ -159,18 +130,6 @@ $(BIN)/%/add_cuda_float32.a: $(GENERATOR_BIN)/add.generator
 		target=$(CUDA_TARGET) \
 		auto_schedule=false
 
-$(BIN)/%/add_halidegrad_cuda_float32.a: $(GENERATOR_BIN)/add.generator
-	@mkdir -p $(@D)
-	@echo Producing CUDA halidegrad
-	@$^ -g add \
-		$(ADD_TYPES_F32) \
-		-f add_halidegrad_cuda_float32 \
-		-e static_library,c_header,pytorch_wrapper \
-		-o $(@D) \
-		-d 1 \
-		target=$(CUDA_TARGET) \
-		auto_schedule=true
-
 $(BIN)/%/add_grad_cuda_float32.a: $(GENERATOR_BIN)/add.generator
 	@mkdir -p $(@D)
 	@echo "Producing CUDA (double) gradient"
@@ -192,18 +151,6 @@ $(BIN)/%/add_cuda_float64.a: $(GENERATOR_BIN)/add.generator
 		-o $(@D) \
 		target=$(CUDA_TARGET) \
 		auto_schedule=false
-
-$(BIN)/%/add_halidegrad_cuda_float64.a: $(GENERATOR_BIN)/add.generator
-	@mkdir -p $(@D)
-	@echo "Producing CUDA (double) halidegrad"
-	@$^ -g add \
-		$(ADD_TYPES_F64) \
-		-f add_halidegrad_cuda_float64 \
-		-e static_library,c_header,pytorch_wrapper \
-		-o $(@D) \
-		-d 1 \
-		target=$(CUDA_TARGET) \
-		auto_schedule=true
 
 $(BIN)/%/add_grad_cuda_float64.a: $(GENERATOR_BIN)/add.generator
 	@mkdir -p $(@D)

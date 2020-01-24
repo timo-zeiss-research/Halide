@@ -125,30 +125,30 @@ public:
 };
 }  // namespace
 
-void RDom::initialize_from_region(const Region &region, string name) {
+void RDom::initialize_from_ranges(const std::vector<std::pair<Expr, Expr>> &ranges, string name) {
     if (name.empty()) {
         name = make_entity_name(this, "Halide:.*:RDom", 'r');
     }
 
     std::vector<ReductionVariable> vars;
-    for (size_t i = 0; i < region.size(); i++) {
+    for (size_t i = 0; i < ranges.size(); i++) {
         CheckRDomBounds checker;
-        user_assert(region[i].min.defined() && region[i].extent.defined())
+        user_assert(ranges[i].first.defined() && ranges[i].second.defined())
             << "The RDom " << name << " may not be constructed with undefined Exprs.\n";
-        region[i].min.accept(&checker);
-        region[i].extent.accept(&checker);
+        ranges[i].first.accept(&checker);
+        ranges[i].second.accept(&checker);
         user_assert(checker.offending_func.empty())
             << "The bounds of the RDom " << name
             << " in dimension " << i
             << " are:\n"
-            << "  " << region[i].min << " ... " << region[i].extent << "\n"
+            << "  " << ranges[i].first << " ... " << ranges[i].second << "\n"
             << "These depend on a call to the Func " << checker.offending_func << ".\n"
             << "The bounds of an RDom may not depend on a call to a Func.\n";
         user_assert(checker.offending_free_var.empty())
             << "The bounds of the RDom " << name
             << " in dimension " << i
             << " are:\n"
-            << "  " << region[i].min << " ... " << region[i].extent << "\n"
+            << "  " << ranges[i].first << " ... " << ranges[i].second << "\n"
             << "These depend on the variable " << checker.offending_free_var << ".\n"
             << "The bounds of an RDom may not depend on a free variable.\n";
 
@@ -172,8 +172,8 @@ void RDom::initialize_from_region(const Region &region, string name) {
         }
         ReductionVariable rv;
         rv.var = name + "$" + rvar_uniquifier;
-        rv.min = cast<int32_t>(region[i].min);
-        rv.extent = cast<int32_t>(region[i].extent);
+        rv.min = cast<int32_t>(ranges[i].first);
+        rv.extent = cast<int32_t>(ranges[i].second);
         vars.push_back(rv);
     }
     dom = ReductionDomain(vars);

@@ -14,13 +14,13 @@ typedef unsigned long addr_t;
 
 typedef unsigned int qurt_size_t;
 typedef unsigned int qurt_mem_pool_t;
-#define HALIDE_HEXAGON_ENUM enum __attribute__((aligned(4)))
+#define HALIDE_HEXAGON_ENUM  enum __attribute__((aligned(4)))
 
-__inline static int align(int x, int a) {
-    return ((x + a - 1) & (~(a - 1)));
-}
+__inline static int align(int x,int a) {
+    return ( (x+a-1) & (~(a-1)) );    
+} 
 
-HALIDE_HEXAGON_ENUM{QURT_EOK = 0};
+HALIDE_HEXAGON_ENUM { QURT_EOK = 0 };
 
 /*!
  * Power Corner vote
@@ -36,7 +36,7 @@ HALIDE_HEXAGON_ENUM{QURT_EOK = 0};
 /*!
  * Format IDs
  */
-typedef HALIDE_HEXAGON_ENUM{
+typedef HALIDE_HEXAGON_ENUM {
     eDmaFmt_RawData,
     eDmaFmt_NV12,
     eDmaFmt_NV12_Y,
@@ -54,26 +54,26 @@ typedef HALIDE_HEXAGON_ENUM{
     eDmaFmt_MAX,
 } t_eDmaFmt;
 
-/*!
+  /*!
    * DMA status
    * Currently not use, for future development
    */
-typedef void *t_stDmaWrapperDmaStats;
+  typedef void* t_stDmaWrapperDmaStats;
 
-/*!
+  /*!
    * Transfer type
    */
-typedef HALIDE_HEXAGON_ENUM eDmaWrapper_TransationType{
+  typedef HALIDE_HEXAGON_ENUM eDmaWrapper_TransationType {
     //! DDR to L2 transfer
     eDmaWrapper_DdrToL2,
     //! L2 to DDR transfer
     eDmaWrapper_L2ToDdr,
-} t_eDmaWrapper_TransationType;
+  } t_eDmaWrapper_TransationType;
 
-/*!
+  /*!
    * Roi Properties
    */
-typedef struct stDmaWrapper_Roi {
+  typedef struct stDmaWrapper_Roi {
     //! ROI x position in pixels
     uint16 u16X;
     //! ROI y position in pixels
@@ -82,12 +82,12 @@ typedef struct stDmaWrapper_Roi {
     uint16 u16W;
     //! ROI height in pixels
     uint16 u16H;
-} t_StDmaWrapper_Roi;
+  } t_StDmaWrapper_Roi;
 
-/*!
+  /*!
    * Frame Properties
    */
-typedef struct stDmaWrapper_FrameProp {
+  typedef struct stDmaWrapper_FrameProp {
     //! Starting physical address to buffer
     addr_t aAddr;
     //! Frame height in pixels
@@ -96,23 +96,23 @@ typedef struct stDmaWrapper_FrameProp {
     uint16 u16W;
     //! Frame stride in pixels
     uint16 u16Stride;
-} t_StDmaWrapper_FrameProp;
+  } t_StDmaWrapper_FrameProp;
 
-/*!
+  /*!
    * Roi alignment
    */
-typedef struct stDmaWrapper_RoiAlignInfo {
+  typedef struct stDmaWrapper_RoiAlignInfo {
     //! ROI width in pixels
     uint16 u16W;
     //! ROI height in pixels
     uint16 u16H;
-} t_StDmaWrapper_RoiAlignInfo;
+  } t_StDmaWrapper_RoiAlignInfo;
 
-/*!
+  /*!
    * DmaTransferSetup Properties
    */
 
-typedef struct stDmaWrapper_DmaTransferSetup {
+  typedef struct stDmaWrapper_DmaTransferSetup {
     //! Frame Width in pixels
     uint16 u16FrameW;
     //! Frame height in pixels
@@ -130,11 +130,11 @@ typedef struct stDmaWrapper_DmaTransferSetup {
     //! ROI stride in pixels
     uint16 u16RoiStride;
     //! Virtual address of the HW descriptor buffer (must be locked in the L2$).
-    void *pDescBuf;
+    void* pDescBuf;
     //! Virtual address of the TCM pixeldata buffer (must be locked in the L2$).
-    void *pTcmDataBuf;
+    void*  pTcmDataBuf;
     //! Virtual address of the DDR Frame buffer .
-    void *pFrameBuf;
+    void*  pFrameBuf;
     //UBWC Format
     uint16 bIsFmtUbwc;
     //! Should the intermediate buffer be padded. This only apply for 8bit format sucha NV12, NV12-4R
@@ -143,30 +143,31 @@ typedef struct stDmaWrapper_DmaTransferSetup {
     t_eDmaFmt eFmt;
     //! TransferType: eDmaWrapper_DdrToL2 (Read from DDR), eDmaWrapper_L2ToDDR (Write to DDR);
     t_eDmaWrapper_TransationType eTransferType;
-} t_StDmaWrapper_DmaTransferSetup;
+  } t_StDmaWrapper_DmaTransferSetup;
 
-/*!
+  /*!
    * @brief  API for Cache Allocation
    * @description Abstraction for allocation of memory in cache and lock
    *
    * @return NULL or Memory
    */
-void *HAP_cache_lock(unsigned int size, void **paddr_ptr);
+  void* HAP_cache_lock(unsigned int size, void** paddr_ptr);
 
-/*!
+
+  /*!
    * @brief  API for Free
    * @description Abstraction for deallocation of memory and unlock cache
    *
    * @return void
    */
-int HAP_cache_unlock(void *vaddr_ptr);
+  int HAP_cache_unlock(void* vaddr_ptr);
 
-/*!
+  /*!
    * Handle for wrapper DMA engine
    */
-typedef void *t_DmaWrapper_DmaEngineHandle;
+  typedef void* t_DmaWrapper_DmaEngineHandle;
 
-/*!
+  /*!
    * @brief       Allocates a DMA Engine to be used
    *
    * @description Allocates a DMA Engine to be used by using the default
@@ -175,9 +176,9 @@ typedef void *t_DmaWrapper_DmaEngineHandle;
    * @return      Success: Engine's DMA Handle
    * @n           Failure: NULL
    */
-extern t_DmaWrapper_DmaEngineHandle hDmaWrapper_AllocDma(void);
+  extern t_DmaWrapper_DmaEngineHandle hDmaWrapper_AllocDma(void);
 
-/*!
+  /*!
    * @brief       Frees a DMA Engine
    *
    * @description Frees a DMA Engine that was previously allocated by AllocDma().
@@ -187,9 +188,9 @@ extern t_DmaWrapper_DmaEngineHandle hDmaWrapper_AllocDma(void);
    * @return      Success: OK
    * @n           Failure: ERR
    */
-extern int32 nDmaWrapper_FreeDma(t_DmaWrapper_DmaEngineHandle hDmaHandle);
+  extern int32 nDmaWrapper_FreeDma(t_DmaWrapper_DmaEngineHandle hDmaHandle);
 
-/*!
+  /*!
    * @brief       Starts a transfer request on the DMA engine
    *
    * @description Starts a transfer on the provided DMA engine. The transfer is based
@@ -201,9 +202,9 @@ extern int32 nDmaWrapper_FreeDma(t_DmaWrapper_DmaEngineHandle hDmaHandle);
    * @return      Success: OK
    * @n           Failure: ERR
    */
-extern int32 nDmaWrapper_Move(t_DmaWrapper_DmaEngineHandle hDmaHandle);
+  extern int32 nDmaWrapper_Move(t_DmaWrapper_DmaEngineHandle hDmaHandle);
 
-/*!
+  /*!
    * @brief       Waits for all outstanding transfers on the DMA to complete
    *
    * @description Blocks until all outstanding transfers on the DMA are complete.
@@ -215,9 +216,9 @@ extern int32 nDmaWrapper_Move(t_DmaWrapper_DmaEngineHandle hDmaHandle);
    * @return      Success: OK
    * @n           Failure: ERR
    */
-extern int32 nDmaWrapper_Wait(t_DmaWrapper_DmaEngineHandle hDmaHandle);
+  extern int32 nDmaWrapper_Wait(t_DmaWrapper_DmaEngineHandle hDmaHandle);
 
-/*!
+  /*!
    * @brief       Cleans up all transfers and flushes DMA buffers
    *
    * @description This call flushes the DMA buffers.
@@ -228,9 +229,9 @@ extern int32 nDmaWrapper_Wait(t_DmaWrapper_DmaEngineHandle hDmaHandle);
    * @return      Success: OK
    * @n           Failure: ERR
    */
-extern int32 nDmaWrapper_FinishFrame(t_DmaWrapper_DmaEngineHandle hDmaHandle);
+  extern int32 nDmaWrapper_FinishFrame(t_DmaWrapper_DmaEngineHandle hDmaHandle);
 
-/*!
+  /*!
    * @brief       Get the recommended walk ROI width and height
    *
    * @description Get the recommended walk ROI width and height that should
@@ -247,10 +248,10 @@ extern int32 nDmaWrapper_FinishFrame(t_DmaWrapper_DmaEngineHandle hDmaHandle);
    * @return      Success: OK
    * @n           Failure: ERR
    */
-extern int32 nDmaWrapper_GetRecommendedWalkSize(t_eDmaFmt eFmtId, bool bIsUbwc,
-                                                t_StDmaWrapper_RoiAlignInfo *pStWalkSize);
+  extern int32 nDmaWrapper_GetRecommendedWalkSize(t_eDmaFmt eFmtId, bool bIsUbwc,
+                                                  t_StDmaWrapper_RoiAlignInfo* pStWalkSize);
 
-/*!
+  /*!
    * @brief       Get the HW descriptor buffer size per DMA engine
    *
    * @description Calculates the HW descriptor buffer size based
@@ -262,9 +263,9 @@ extern int32 nDmaWrapper_GetRecommendedWalkSize(t_eDmaFmt eFmtId, bool bIsUbwc,
    *
    * @return      Descriptor buffer size in bytes
    */
-extern int32 nDmaWrapper_GetDescbuffsize(t_eDmaFmt *aeFmtId, uint16 nsize);
+  extern int32 nDmaWrapper_GetDescbuffsize(t_eDmaFmt *aeFmtId, uint16 nsize);
 
-/*!
+  /*!
    * @brief       Get the recommended intermediate buffer stride.
    *
    * @description Get the recommended (minimum) intermediate buffer stride for the
@@ -279,11 +280,12 @@ extern int32 nDmaWrapper_GetDescbuffsize(t_eDmaFmt *aeFmtId, uint16 nsize);
    * @return      Success: The intermediate buffer stride in pixels
    * @n           Failure: ERR
    */
-extern int32 nDmaWrapper_GetRecommendedIntermBufStride(t_eDmaFmt eFmtId,
-                                                       t_StDmaWrapper_RoiAlignInfo *pStRoiSize,
-                                                       bool bIsUbwc);
+  extern int32 nDmaWrapper_GetRecommendedIntermBufStride(t_eDmaFmt eFmtId,
+                                                         t_StDmaWrapper_RoiAlignInfo* pStRoiSize,
+                                                         bool bIsUbwc);
 
-/*!
+
+  /*!
    * @brief       Get the recommended intermediate buffer size
    *
    * @description Get the recommended intermediate buffer size for the L2 cache
@@ -308,11 +310,11 @@ extern int32 nDmaWrapper_GetRecommendedIntermBufStride(t_eDmaFmt eFmtId,
    * @return      Success: The intermediate buffer size in bytes
    * @n           Failure: ERR
    */
-extern int32 nDmaWrapper_GetRecommendedIntermBufSize(t_eDmaFmt eFmtId, bool bUse16BitPaddingInL2,
-                                                     t_StDmaWrapper_RoiAlignInfo *pStRoiSize,
+   extern int32 nDmaWrapper_GetRecommendedIntermBufSize(t_eDmaFmt eFmtId, bool bUse16BitPaddingInL2,
+                                                     t_StDmaWrapper_RoiAlignInfo* pStRoiSize,
                                                      bool bIsUbwc, uint16 u16IntermBufStride);
 
-/*!
+  /*!
    * @brief       Dma transfer parameters per HW descriptor
    *
    * @description Setup Dma transfer parameters required to be ready to make DMA transfer.
@@ -326,9 +328,9 @@ extern int32 nDmaWrapper_GetRecommendedIntermBufSize(t_eDmaFmt eFmtId, bool bUse
    * @return      Success: OK
    *              Failure: ERR
    */
-extern int32 nDmaWrapper_DmaTransferSetup(t_DmaWrapper_DmaEngineHandle hDmaHandle, t_StDmaWrapper_DmaTransferSetup *stpDmaTransferParm);
+  extern int32 nDmaWrapper_DmaTransferSetup(t_DmaWrapper_DmaEngineHandle hDmaHandle, t_StDmaWrapper_DmaTransferSetup* stpDmaTransferParm);
 
-/*!
+  /*!
    * @brief       DMA power voting based on Cornercase
    *
    * @description DMA power voting
@@ -344,7 +346,8 @@ extern int32 nDmaWrapper_DmaTransferSetup(t_DmaWrapper_DmaEngineHandle hDmaHandl
    * @return      Success: OK
    * @n           Failure: ERR
    */
-extern int32 nDmaWrapper_PowerVoting(uint32 cornercase);
+   extern int32 nDmaWrapper_PowerVoting(uint32 cornercase);
+
 
 #ifdef __cplusplus
 }

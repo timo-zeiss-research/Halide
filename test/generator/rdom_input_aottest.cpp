@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "HalideBuffer.h"
 #include "rdom_input.h"
+#include "HalideBuffer.h"
 
 using namespace Halide::Runtime;
 

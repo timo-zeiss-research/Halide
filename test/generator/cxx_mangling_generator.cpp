@@ -14,16 +14,11 @@ Halide::Expr extract_value_ns(Halide::Expr arg) {
 }
 
 namespace my_namespace {
-class my_class {
-public:
-    int foo;
-};
+class my_class {public: int foo;};
 namespace my_subnamespace {
-struct my_struct {
-    int foo;
-};
-}  // namespace my_subnamespace
-}  // namespace my_namespace
+struct my_struct {int foo;};
+}
+}
 union my_union {
     float a;
     int b;
@@ -77,7 +72,7 @@ public:
 
         // No significance to the calculation here.
         output(x) = select(scale_direction, (input(x) * scale_f + offset) / scale_d,
-                           (input(x) * scale_d + offset) / scale_f);
+                                       (input(x) * scale_d + offset) / scale_f);
     }
 
     void schedule() {

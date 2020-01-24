@@ -16,3 +16,4 @@ public:
 }  // namespace
 
 HALIDE_REGISTER_GENERATOR(ImageFromArray, image_from_array)
+

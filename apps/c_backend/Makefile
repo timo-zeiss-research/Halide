@@ -1,10 +1,10 @@
 include ../support/Makefile.inc
 
-.PHONY: build clean test
-build: $(BIN)/$(HL_TARGET)/run $(BIN)/$(HL_TARGET)/run_cpp
-test: build
+test: $(BIN)/$(HL_TARGET)/run $(BIN)/$(HL_TARGET)/run_cpp
 	$(BIN)/$(HL_TARGET)/run
 	$(BIN)/$(HL_TARGET)/run_cpp
+
+all: $(BIN)/$(HL_TARGET)/test
 
 $(GENERATOR_BIN)/pipeline.generator: pipeline_generator.cpp $(GENERATOR_DEPS)
 	@mkdir -p $(@D)

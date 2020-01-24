@@ -1,6 +1,6 @@
 #include "Halide.h"
-#include "halide_benchmark.h"
 #include <cstdio>
+#include "halide_benchmark.h"
 
 using namespace Halide;
 using namespace Halide::Tools;

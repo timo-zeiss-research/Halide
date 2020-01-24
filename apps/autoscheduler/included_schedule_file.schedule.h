@@ -9,9 +9,11 @@
 
 #include "Halide.h"
 
+
 inline void apply_schedule_included_schedule_file(
     ::Halide::Pipeline pipeline,
-    ::Halide::Target target) {
+    ::Halide::Target target
+) {
     using ::Halide::Func;
     using ::Halide::MemoryType;
     using ::Halide::RVar;
@@ -55,6 +57,7 @@ inline void apply_schedule_included_schedule_file(
         .vectorize(ci)
         .compute_at(relu, c)
         .reorder(ci, c, x, y, n);
+
 }
 
 #endif  // included_schedule_file_SCHEDULE_H

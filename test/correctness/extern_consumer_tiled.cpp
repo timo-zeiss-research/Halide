@@ -11,7 +11,8 @@ using namespace Halide;
 #define DLLEXPORT
 #endif
 
-extern "C" DLLEXPORT int copy_plus_xcoord(halide_buffer_t *input, int tile_extent_x, int tile_extent_y, halide_buffer_t *output) {
+extern "C" DLLEXPORT
+int copy_plus_xcoord(halide_buffer_t *input, int tile_extent_x, int tile_extent_y, halide_buffer_t *output) {
     // Note the final output buffer argument is unused.
     if (input->is_bounds_query()) {
         for (int d = 0; d < 2; d++) {
@@ -28,7 +29,7 @@ extern "C" DLLEXPORT int copy_plus_xcoord(halide_buffer_t *input, int tile_exten
         assert(output->dim[1].extent <= tile_extent_y);
         for (int y = min_y; y <= max_y; y++) {
             for (int x = min_x; x <= max_x; x++) {
-                int coords[2] = {x, y};
+                int coords[2] = { x, y };
                 *(int *)output->address_of(coords) = *(int *)input->address_of(coords) + x;
             }
         }
@@ -40,7 +41,7 @@ extern "C" DLLEXPORT int copy_plus_xcoord(halide_buffer_t *input, int tile_exten
 int main(int argc, char **argv) {
     Func input;
     Var x, y;
-    input(x, y) = x * y;
+    input(x, y) = x*y;
 
     // We pass the tile size of the extern stage to the extern stage
     // only to test that it is in fact being tiled.
@@ -60,7 +61,7 @@ int main(int argc, char **argv) {
 
     for (int y = 0; y < buf.height(); y++) {
         for (int x = 0; x < buf.width(); x++) {
-            assert(buf(x, y) == x * y + x);
+            assert(buf(x, y) == x*y + x);
         }
     }
 

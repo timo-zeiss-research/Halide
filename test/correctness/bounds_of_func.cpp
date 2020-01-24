@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
         Buffer<float> in_buf = in.get();
 
         assert(in_buf.min(0) == 10 && in_buf.extent(0) == 11);
+
     }
 
     {
@@ -44,6 +45,7 @@ int main(int argc, char **argv) {
         Buffer<float> in_buf = in.get();
 
         assert(in_buf.min(0) == 10 && in_buf.extent(0) == 11);
+
     }
 
     {
@@ -77,8 +79,8 @@ int main(int argc, char **argv) {
 
         for (int i = 1; i < 20; i++) {
             f = Func();
-            f(x) = Tuple(fs[i - 1](x)[0] + fs[i - 1](x)[1],
-                         fs[i - 1](x)[1] - fs[i - 1](x)[0]);
+            f(x) = Tuple(fs[i-1](x)[0] + fs[i-1](x)[1],
+                         fs[i-1](x)[1] - fs[i-1](x)[0]);
             f.compute_root();
             fs.push_back(f);
         }

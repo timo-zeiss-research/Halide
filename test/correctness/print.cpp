@@ -1,8 +1,8 @@
 #include "Halide.h"
-#include <limits>
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <limits>
 
 using namespace Halide;
 
@@ -92,6 +92,7 @@ int main(int argc, char **argv) {
         assert(nine == 9);
         assert(forty_two == 42.0f);
         assert(p == 127);
+
     }
 
     messages.clear();
@@ -130,7 +131,7 @@ int main(int argc, char **argv) {
     // Check that Halide's stringification of floats and doubles
     // matches %f and %e respectively.
 
-#ifndef _WIN32
+    #ifndef _WIN32
     // msvc's library has different ideas about how %f and %e should come out.
     {
         Func f, g;
@@ -198,8 +199,10 @@ int main(int argc, char **argv) {
                 return -1;
             }
         }
+
+
     }
-#endif
+    #endif
 
     messages.clear();
 
@@ -250,6 +253,7 @@ int main(int argc, char **argv) {
             // can't read the messages.
         }
     }
+
 
     printf("Success!\n");
     return 0;

@@ -1,11 +1,10 @@
 include ../support/Makefile.inc
 
-.PHONY: build clean test
-build: $(BIN)/$(HL_TARGET)/test
+all: $(BIN)/$(HL_TARGET)/test
 
 $(GENERATOR_BIN)/halide_blur.generator: halide_blur_generator.cpp $(GENERATOR_DEPS)
 	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) $(filter %.cpp,$^) -o $@ $(GENERATOR_LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(filter-out %.h,$^) -o $@ $(LDFLAGS) $(HALIDE_SYSTEM_LIBS)
 
 $(BIN)/%/halide_blur.a: $(GENERATOR_BIN)/halide_blur.generator
 	@mkdir -p $(@D)
@@ -27,5 +26,6 @@ $(BIN)/%/test: $(BIN)/%/halide_blur.a test.cpp
 clean:
 	rm -rf $(BIN)
 
+.PHONY: test
 test: $(BIN)/$(HL_TARGET)/test
-	$<
+	$(BIN)/$(HL_TARGET)/test

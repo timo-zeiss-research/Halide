@@ -1,13 +1,13 @@
-#include <assert.h>
+#include <stdio.h>
 #include <atomic>
 #include <iostream>
+#include <assert.h>
 #include <mutex>
 #include <random>
-#include <stdio.h>
 #include <thread>
 
-#include "HalideBuffer.h"
 #include "HalideRuntime.h"
+#include "HalideBuffer.h"
 
 #include "async_parallel.h"
 
@@ -99,7 +99,7 @@ void watchdog() {
             last_call *lc = all_thread_lasts;
             while (lc != nullptr) {
                 if (*lc < *best) {
-                    best = lc;
+                     best = lc;
                 }
                 thread_count++;
                 lc = lc->next;

@@ -1,33 +1,18 @@
 include ../support/Makefile.inc
 
-.PHONY: build clean test
+CXXFLAGS += -g -Wall
 
-build: $(BIN)/$(HL_TARGET)/filter
+.PHONY: clean
 
-test: $(BIN)/$(HL_TARGET)/out.png
-
-$(GENERATOR_BIN)/interpolate.generator: interpolate_generator.cpp $(GENERATOR_DEPS)
+$(BIN)/%/interpolate: interpolate.cpp $(LIB_HALIDE)
 	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) -g $(filter %.cpp,$^) -o $@ $(GENERATOR_LDFLAGS)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(IMAGE_IO_FLAGS) $(LDFLAGS) $(HALIDE_SYSTEM_LIBS)
 
-$(BIN)/%/interpolate.a: $(GENERATOR_BIN)/interpolate.generator
+$(BIN)/%/out.png: $(BIN)/%/interpolate
 	@mkdir -p $(@D)
-	$< -g interpolate -f interpolate -o $(BIN)/$* target=$*-no_runtime auto_schedule=false
-
-$(BIN)/%/interpolate_auto_schedule.a: $(GENERATOR_BIN)/interpolate.generator
-	@mkdir -p $(@D)
-	$< -g interpolate -f interpolate_auto_schedule -o $(BIN)/$* target=$*-no_runtime auto_schedule=true
-
-$(BIN)/%/runtime.a: $(GENERATOR_BIN)/interpolate.generator
-	@mkdir -p $(@D)
-	$< -r runtime -o $(BIN)/$* target=$*
-
-$(BIN)/%/filter: filter.cpp $(BIN)/%/interpolate.a $(BIN)/%/interpolate_auto_schedule.a $(BIN)/%/runtime.a
-	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) -I$(BIN)/$* -Wall -O3 $^ -o $@ $(LDFLAGS) $(IMAGE_IO_FLAGS) $(CUDA_LDFLAGS) $(OPENCL_LDFLAGS) $(OPENGL_LDFLAGS)
-
-$(BIN)/%/out.png: $(BIN)/%/filter
-	$< ../images/rgba.png $(BIN)/$*/out.png
+	$^ $(IMAGES)/rgba.png $@
 
 clean:
 	rm -rf $(BIN)
+
+test: $(BIN)/$(HL_TARGET)/out.png

@@ -78,7 +78,8 @@ struct MatcherState {
 
     // values of the lanes field with special meaning.
     static constexpr uint16_t signed_integer_overflow = 0x8000;
-    static constexpr uint16_t special_values_mask = 0x8000;  // currently only one
+    static constexpr uint16_t indeterminate_expression = 0x4000;
+    static constexpr uint16_t special_values_mask = 0xc000;
 
     halide_type_t bound_const_type[max_wild];
 
@@ -141,7 +142,9 @@ struct bindings {
 inline HALIDE_NEVER_INLINE Expr make_const_special_expr(halide_type_t ty) {
     const uint16_t flags = ty.lanes & MatcherState::special_values_mask;
     ty.lanes &= ~MatcherState::special_values_mask;
-    if (flags & MatcherState::signed_integer_overflow) {
+    if (flags & MatcherState::indeterminate_expression) {
+        return make_indeterminate_expression(ty);
+    } else if (flags & MatcherState::signed_integer_overflow) {
         return make_signed_integer_overflow(ty);
     }
     // unreachable
@@ -953,17 +956,27 @@ HALIDE_ALWAYS_INLINE auto div(A a, B b) -> decltype(IRMatcher::operator/(a, b)) 
 
 template<>
 HALIDE_ALWAYS_INLINE int64_t constant_fold_bin_op<Div>(halide_type_t &t, int64_t a, int64_t b) noexcept {
-    return div_imp(a, b);
+    if (b == 0) {
+        t.lanes |= MatcherState::indeterminate_expression;
+        return 0;
+    } else {
+        return div_imp(a, b);
+    }
 }
 
 template<>
 HALIDE_ALWAYS_INLINE uint64_t constant_fold_bin_op<Div>(halide_type_t &t, uint64_t a, uint64_t b) noexcept {
-    return div_imp(a, b);
+    if (b == 0) {
+        t.lanes |= MatcherState::indeterminate_expression;
+        return 0;
+    } else {
+        return a / b;
+    }
 }
 
 template<>
 HALIDE_ALWAYS_INLINE double constant_fold_bin_op<Div>(halide_type_t &t, double a, double b) noexcept {
-    return div_imp(a, b);
+    return a / b;
 }
 
 template<typename A, typename B>
@@ -978,12 +991,22 @@ HALIDE_ALWAYS_INLINE auto mod(A a, B b) -> decltype(IRMatcher::operator%(a, b)) 
 
 template<>
 HALIDE_ALWAYS_INLINE int64_t constant_fold_bin_op<Mod>(halide_type_t &t, int64_t a, int64_t b) noexcept {
-    return mod_imp(a, b);
+    if (b == 0) {
+        t.lanes |= MatcherState::indeterminate_expression;
+        return 0;
+    } else {
+        return mod_imp(a, b);
+    }
 }
 
 template<>
 HALIDE_ALWAYS_INLINE uint64_t constant_fold_bin_op<Mod>(halide_type_t &t, uint64_t a, uint64_t b) noexcept {
-    return mod_imp(a, b);
+    if (b == 0) {
+        t.lanes |= MatcherState::indeterminate_expression;
+        return 0;
+    } else {
+        return a % b;
+    }
 }
 
 template<>
@@ -1203,7 +1226,7 @@ HALIDE_ALWAYS_INLINE uint64_t constant_fold_bin_op<Or>(halide_type_t &t, uint64_
 
 template<>
 HALIDE_ALWAYS_INLINE double constant_fold_bin_op<Or>(halide_type_t &t, double a, double b) noexcept {
-    // Unreachable, as it would be a type mismatch.
+    t.lanes |= MatcherState::indeterminate_expression;
     return 0;
 }
 
@@ -1229,7 +1252,7 @@ HALIDE_ALWAYS_INLINE uint64_t constant_fold_bin_op<And>(halide_type_t &t, uint64
 
 template<>
 HALIDE_ALWAYS_INLINE double constant_fold_bin_op<And>(halide_type_t &t, double a, double b) noexcept {
-    // Unreachable
+    t.lanes |= MatcherState::indeterminate_expression;
     return 0;
 }
 
@@ -1357,6 +1380,10 @@ struct NotOp {
         a.make_folded_const(val, ty, state);
         val.u.u64 = ~val.u.u64;
         val.u.u64 &= 1;
+        ty.lanes |= (((int)ty.code == (int)halide_type_float) ||
+                     ((int)ty.code == (int)halide_type_bfloat)) ?
+                        MatcherState::indeterminate_expression :
+                        0;
     }
 };
 
@@ -1747,6 +1774,40 @@ HALIDE_ALWAYS_INLINE auto overflows(A a) noexcept -> Overflows<decltype(pattern_
 template<typename A>
 std::ostream &operator<<(std::ostream &s, const Overflows<A> &op) {
     s << "overflows(" << op.a << ")";
+    return s;
+}
+
+struct Indeterminate {
+    struct pattern_tag {};
+
+    constexpr static uint32_t binds = 0;
+
+    template<uint32_t bound>
+    HALIDE_ALWAYS_INLINE bool match(const BaseExprNode &e, MatcherState &state) const noexcept {
+        if (e.node_type != Call::_node_type) {
+            return false;
+        }
+        const Call &op = (const Call &)e;
+        return (op.is_intrinsic(Call::indeterminate_expression));
+    }
+
+    HALIDE_ALWAYS_INLINE
+    Expr make(MatcherState &state, halide_type_t type_hint) const {
+        type_hint.lanes |= MatcherState::indeterminate_expression;
+        return make_const_special_expr(type_hint);
+    }
+
+    constexpr static bool foldable = true;
+
+    HALIDE_ALWAYS_INLINE
+    void make_folded_const(halide_scalar_value_t &val, halide_type_t &ty, MatcherState &state) const noexcept {
+        val.u.u64 = 0;
+        ty.lanes |= MatcherState::indeterminate_expression;
+    }
+};
+
+inline std::ostream &operator<<(std::ostream &s, const Indeterminate &op) {
+    s << "indeterminate()";
     return s;
 }
 

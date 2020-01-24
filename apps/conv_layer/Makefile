@@ -1,8 +1,6 @@
 include ../support/Makefile.inc
 
-.PHONY: build clean test
-
-build: $(BIN)/$(HL_TARGET)/process
+all: $(BIN)/$(HL_TARGET)/process
 
 $(GENERATOR_BIN)/conv_layer.generator: conv_layer_generator.cpp $(GENERATOR_DEPS)
 	@mkdir -p $(@D)

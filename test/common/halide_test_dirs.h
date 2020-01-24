@@ -96,7 +96,7 @@ inline std::string get_test_tmp_dir() {
     return dir;
 }
 
-}  // namespace Internal
 }  // namespace Halide
+}  // namespace Internal
 
 #endif  // HALIDE_TEST_DIRS_H

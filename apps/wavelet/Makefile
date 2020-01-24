@@ -1,8 +1,6 @@
 include ../support/Makefile.inc
 
-.PHONY: build clean test
-
-build: $(BIN)/$(HL_TARGET)/wavelet
+all: test
 
 clean:
 	@rm -rf $(BIN)
@@ -11,7 +9,7 @@ clean:
 $(GENERATOR_BIN)/%.generator: %_generator.cpp $(GENERATOR_DEPS)
 	@echo Building Generator $(filter %_generator.cpp,$^)
 	@mkdir -p $(@D)
-	@$(CXX) $(CXXFLAGS) $(filter %.cpp,$^) $(GENERATOR_LDFLAGS) -o $@
+	@$(CXX) $(CXXFLAGS) $(filter-out %.h,$^) $(LDFLAGS) $(HALIDE_SYSTEM_LIBS) -o $@
 
 # Can't have multiple wildcards in Make, so we'll use a macro
 # to stamp out all the rules we need

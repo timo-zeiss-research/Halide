@@ -7,7 +7,7 @@ using namespace Halide;
 int main(int argc, char **argv) {
     Func f;
     Var x, y;
-    f(x, y) = 3 * x + y;
+    f(x, y) = 3*x + y;
 
     // Should result in an error
     Func g;
@@ -16,3 +16,4 @@ int main(int argc, char **argv) {
     printf("Success!\n");
     return 0;
 }
+

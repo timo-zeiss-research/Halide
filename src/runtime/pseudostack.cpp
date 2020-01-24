@@ -19,4 +19,5 @@ inline WEAK __attribute__((always_inline)) __attribute__((used)) void pseudostac
     if (slot->ptr) halide_free(user_context, slot->ptr);
     slot->ptr = NULL;
 }
+
 }

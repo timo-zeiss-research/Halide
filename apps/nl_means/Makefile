@@ -1,12 +1,11 @@
 include ../support/Makefile.inc
 
-.PHONY: build clean test
 
-build: $(BIN)/$(HL_TARGET)/process
+all: $(BIN)/$(HL_TARGET)/process
 
 $(GENERATOR_BIN)/nl_means.generator: nl_means_generator.cpp $(GENERATOR_DEPS)
 	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) $(filter %.cpp,$^) -o $@ $(GENERATOR_LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(filter-out %.h,$^) -o $@ $(LDFLAGS)
 
 $(BIN)/%/nl_means.a: $(GENERATOR_BIN)/nl_means.generator
 	@mkdir -p $(@D)

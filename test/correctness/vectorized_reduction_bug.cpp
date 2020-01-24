@@ -2,6 +2,7 @@
 #include <stdio.h>
 using namespace Halide;
 
+
 int main(int argc, char *argv[]) {
     {
         Func sum("sum"), foo("foo");
@@ -55,7 +56,7 @@ int main(int argc, char *argv[]) {
 
         for (int y = 0; y < im.height(); y++) {
             for (int x = 0; x < im.width(); x++) {
-                int correct = (x != 0) ? 0 : 120 * (x + y) + 120 * 119 / 2;
+                int correct = (x != 0) ? 0 : 120*(x + y) + 120*119/2;
                 if (im(x, y) != correct) {
                     printf("im(%d, %d) = %d instead of %d\n",
                            x, y, im(x, y), correct);

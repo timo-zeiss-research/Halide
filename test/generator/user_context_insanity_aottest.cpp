@@ -1,10 +1,10 @@
-#include <assert.h>
-#include <atomic>
 #include <math.h>
 #include <stdio.h>
+#include <assert.h>
+#include <atomic>
 
-#include "HalideBuffer.h"
 #include "HalideRuntime.h"
+#include "HalideBuffer.h"
 #include "user_context_insanity.h"
 
 using namespace Halide::Runtime;

@@ -11,9 +11,7 @@ WEAK bool halide_reuse_device_allocations_flag = true;
 WEAK halide_mutex allocation_pools_lock;
 WEAK halide_device_allocation_pool *device_allocation_pools = NULL;
 
-}  // namespace Internal
-}  // namespace Runtime
-}  // namespace Halide
+}}}
 
 extern "C" {
 
@@ -47,4 +45,5 @@ WEAK void halide_register_device_allocation_pool(struct halide_device_allocation
     pool->next = device_allocation_pools;
     device_allocation_pools = pool;
 }
+
 }

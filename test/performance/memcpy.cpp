@@ -1,8 +1,8 @@
 #include "Halide.h"
 #include "halide_benchmark.h"
-#include "test/common/halide_test_dirs.h"
-#include <chrono>
 #include <cstdio>
+#include <chrono>
+#include "test/common/halide_test_dirs.h"
 
 using namespace Halide;
 using namespace Halide::Tools;

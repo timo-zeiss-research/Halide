@@ -1,6 +1,6 @@
 #include "Halide.h"
-#include <memory>
 #include <stdio.h>
+#include <memory>
 
 using namespace Halide;
 
@@ -21,4 +21,5 @@ int main(int argc, char **argv) {
     result = f.realize(1);
 
     return 0;
+
 }

@@ -120,14 +120,32 @@ bool is_no_op(const Stmt &s) {
 
 namespace {
 
-class ExprIsPure : public IRGraphVisitor {
+class ExprIsPure : public IRVisitor {
     using IRVisitor::visit;
 
     void visit(const Call *op) override {
         if (!op->is_pure()) {
             result = false;
         } else {
-            IRGraphVisitor::visit(op);
+            IRVisitor::visit(op);
+        }
+    }
+
+    void visit(const Div *op) override {
+        if (!op->type.is_float() && (!is_const(op->b) || is_zero(op->b))) {
+            // Division by zero is a side-effect
+            result = false;
+        } else {
+            IRVisitor::visit(op);
+        }
+    }
+
+    void visit(const Mod *op) override {
+        if (!op->type.is_float() && (!is_const(op->b) || is_zero(op->b))) {
+            // Mod by zero is a side-effect
+            result = false;
+        } else {
+            IRVisitor::visit(op);
         }
     }
 
@@ -137,7 +155,7 @@ class ExprIsPure : public IRGraphVisitor {
             // mutate.
             result = false;
         } else {
-            IRGraphVisitor::visit(op);
+            IRVisitor::visit(op);
         }
     }
 
@@ -366,6 +384,11 @@ Expr make_two(Type t) {
     return make_const(t, 2);
 }
 
+Expr make_indeterminate_expression(Type type) {
+    static std::atomic<int> counter;
+    return Call::make(type, Call::indeterminate_expression, {counter++}, Call::Intrinsic);
+}
+
 Expr make_signed_integer_overflow(Type type) {
     static std::atomic<int> counter;
     return Call::make(type, Call::signed_integer_overflow, {counter++}, Call::Intrinsic);
@@ -380,7 +403,7 @@ Expr const_false(int w) {
 }
 
 Expr lossless_cast(Type t, Expr e) {
-    if (!e.defined() || t == e.type()) {
+    if (t == e.type()) {
         return e;
     } else if (t.can_represent(e.type())) {
         return cast(t, std::move(e));
@@ -1251,12 +1274,14 @@ Expr operator/(int a, Expr b) {
 
 Expr operator%(Expr a, Expr b) {
     user_assert(a.defined() && b.defined()) << "operator% of undefined Expr\n";
+    user_assert(!Internal::is_zero(b)) << "operator% with constant 0 modulus\n";
     Internal::match_types(a, b);
     return Internal::Mod::make(std::move(a), std::move(b));
 }
 
 Expr operator%(Expr a, int b) {
     user_assert(a.defined()) << "operator% of undefined Expr\n";
+    user_assert(b != 0) << "operator% with constant 0 modulus\n";
     Type t = a.type();
     Internal::check_representable(t, b);
     return Internal::Mod::make(std::move(a), Internal::make_const(t, b));
@@ -1264,6 +1289,7 @@ Expr operator%(Expr a, int b) {
 
 Expr operator%(int a, const Expr &b) {
     user_assert(b.defined()) << "operator% of undefined Expr\n";
+    user_assert(!Internal::is_zero(b)) << "operator% with constant 0 modulus\n";
     Type t = b.type();
     Internal::check_representable(t, a);
     return Internal::Mod::make(Internal::make_const(t, a), std::move(b));
@@ -2101,7 +2127,7 @@ Expr div_round_to_zero(Expr x, Expr y) {
     Type t = x.type();
     return Internal::Call::make(t, Internal::Call::div_round_to_zero,
                                 {std::move(x), std::move(y)},
-                                Internal::Call::Intrinsic);
+                                Internal::Call::PureIntrinsic);
 }
 
 Expr mod_round_to_zero(Expr x, Expr y) {
@@ -2116,7 +2142,7 @@ Expr mod_round_to_zero(Expr x, Expr y) {
     Type t = x.type();
     return Internal::Call::make(t, Internal::Call::mod_round_to_zero,
                                 {std::move(x), std::move(y)},
-                                Internal::Call::Intrinsic);
+                                Internal::Call::PureIntrinsic);
 }
 
 Expr random_float(Expr seed) {
@@ -2183,16 +2209,6 @@ Expr undef(Type t) {
     return Internal::Call::make(t, Internal::Call::undef,
                                 std::vector<Expr>(),
                                 Internal::Call::PureIntrinsic);
-}
-
-Range::Range(const Expr &min_in, const Expr &extent_in)
-    : min(lossless_cast(Int(32), min_in)), extent(lossless_cast(Int(32), extent_in)) {
-    if (min_in.defined() && !min.defined()) {
-        user_error << "Min cannot be losslessly cast to an int32: " << min_in;
-    }
-    if (extent_in.defined() && !extent.defined()) {
-        user_error << "Extent cannot be losslessly cast to an int32: " << extent_in;
-    }
 }
 
 }  // namespace Halide
